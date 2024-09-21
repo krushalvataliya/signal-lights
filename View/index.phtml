@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Signal Lights</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+	<style type="text/css">
+		.container{
+			display: contents;
+		}
+		.signal-circle{
+			width: 50px;
+			height: 50px;
+			display: inline-block;
+			background-color: red;
+			margin: 10px;
+			border-radius: 50%;
+			border: 2px solid black;
+		}
+		.intervals{
+			margin: 15px;
+		}
+		.red{
+			background-color: red;
+		}
+		.green{
+			background-color: green;
+		}
+		.yellow{
+			background-color: yellow;
+		}
+	</style>
+</head>
+<body>
+<?php 
+$signalData = $this->getSignalData(); 
+?>
+	<form id="signal-form">
+		<div class="container">
+			<div class="signal-circle red" id="circle-a"></div>
+			A: <input type="number" name="signalA" id="signal-a" min="1" max="4" value="<?php echo $signalData['a']; ?>">
+		</div>
+		<div class="container">
+			<div class="signal-circle red" id="circle-b"></div>
+			B: <input type="number" name="signalB" id="signal-b" min="1" max="4" value="<?php echo $signalData['b']; ?>">
+		</div>
+		<div class="container">
+			<div class="signal-circle red" id="circle-c"></div>
+			C: <input type="number" name="signalC" id="signal-c" min="1" max="4" value="<?php echo $signalData['c']; ?>">
+		</div>
+		<div class="container">
+			<div class="signal-circle red" id="circle-d"></div>
+			D: <input type="number" name="signalD" id="signal-d" min="1" max="4" value="<?php echo $signalData['d']; ?>">
+		</div>
+
+		<div class="intervals">
+			Green Light Intervals:
+			<input type="number" name="greenInterval" name="green-interval" id="green-interval" value="<?php echo $signalData['green_interval']; ?>">
+		</div>
+
+		<div class="intervals">
+			Yellow Light Intervals:
+			<input type="number" name="yellowInterval" name="yellow-interval" id="yellow-interval" value="<?php echo $signalData['yellow_interval']; ?>">
+		</div>
+		<button type="button" onclick="startSignal()">Start</button>
+		<button type="button" onclick="stopSignal(true)" >Stop</button>
+
+	</form>
+
+	<script type="text/javascript">
+		function startSignal() {
+			var a = $('#signal-a').val();
+			var b = $('#signal-b').val();
+			var c = $('#signal-c').val();
+			var d = $('#signal-d').val();
+			var greenInterval = $('#green-interval').val();
+			var yellowInterval = $('#yellow-interval').val();
+			$.ajax({
+			 	type: "POST",
+			 	data: {
+			 		a: a,
+			 		b: b,
+			 		c: c,
+			 		d: d,
+			 		greenInterval: greenInterval,
+			 		yellowInterval: yellowInterval
+			 	},
+			 	url: "<?php echo $this->getUrl('start') ?>", 
+				success: function(response){
+					response = JSON.parse(response);
+					const sequence = [a, b, c, d];
+					if (response.status === 'success') {
+						runSignal(sequence, greenInterval, yellowInterval);
+					}
+
+					if (response.status === 'error') {
+						alert(response.message)
+					}
+				}
+			});
+		}
+		var signalTimeout;
+		function runSignal(sequence, greenInterval, yellowInterval) {
+			var	signalOrder = sequence.map(Number);
+			var	currentSignal = 0;
+
+			function changeSignalColor() {
+				if (currentSignal >= signalOrder.length) {
+					currentSignal = 0;
+				}
+				if (signalTimeout) {
+					clearTimeout(signalTimeout);
+					signalTimeout = null;
+				}
+				stopSignal()
+				var id = signalOrder[currentSignal];
+				var signalDiv = $('#circle-' + getSignalLatter(id))
+				signalDiv.removeClass('red').addClass('green');
+				signalTimeout = setTimeout(function() {
+					signalDiv.removeClass('green').addClass('yellow');
+					signalTimeout = setTimeout(function() {
+						signalDiv.removeClass('yellow').addClass('red');
+						currentSignal ++;
+						changeSignalColor();
+					}, yellowInterval * 1000);
+
+				}, greenInterval * 1000);
+
+			}
+			changeSignalColor();
+		}
+
+		function stopSignal(button = false) {
+			if (button) {
+				$.ajax({
+				 	type: "POST",
+				 	data: {
+				 	},
+				 	url: "<?php echo $this->getUrl('stop') ?>", 
+					success: function(response){
+						response = JSON.parse(response);
+						if (response.status === 'success') {
+							console.log("signal stopped!!");
+						}
+					}
+				});
+			}
+			clearTimeout(signalTimeout);
+			signalTimeout = null;
+			$('.signal-circle').removeClass('green yellow').addClass('red');
+		}
+
+		function getSignalLatter(id) {
+			switch (id) {
+				case 1:
+					return 'a';
+				case 2:
+					return 'b';
+				case 3:
+					return 'c';
+				case 4:
+					return 'd';
+				default:
+					return ''
+			}
+		}
+	</script>
+</body>
+</html>
