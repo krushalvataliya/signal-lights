@@ -1,72 +1,72 @@
+<?php $signalData = $this->getSignalData(); ?>
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Signal Lights</title>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-	<style type="text/css">
-		.container{
-			display: contents;
-		}
-		.signal-circle{
-			width: 50px;
-			height: 50px;
-			display: inline-block;
-			background-color: red;
-			margin: 10px;
-			border-radius: 50%;
-			border: 2px solid black;
-		}
-		.intervals{
-			margin: 15px;
-		}
-		.red{
-			background-color: red;
-		}
-		.green{
-			background-color: green;
-		}
-		.yellow{
-			background-color: yellow;
-		}
-	</style>
+	<link rel="stylesheet" href="Skin/css/style.css">
 </head>
 <body>
-<?php 
-$signalData = $this->getSignalData(); 
-?>
-	<form id="signal-form">
-		<div class="container">
+
+<div class="container">
+	<h1>Signal Lights Control</h1>
+
+	<div class="signal-wrapper">
+		<div class="signal-core">
 			<div class="signal-circle red" id="circle-a"></div>
-			A: <input type="number" name="signalA" id="signal-a" min="1" max="4" value="<?php echo $signalData['a']; ?>">
 		</div>
-		<div class="container">
+		<div class="signal-core">
 			<div class="signal-circle red" id="circle-b"></div>
-			B: <input type="number" name="signalB" id="signal-b" min="1" max="4" value="<?php echo $signalData['b']; ?>">
 		</div>
-		<div class="container">
+		<div class="signal-core">
 			<div class="signal-circle red" id="circle-c"></div>
-			C: <input type="number" name="signalC" id="signal-c" min="1" max="4" value="<?php echo $signalData['c']; ?>">
 		</div>
-		<div class="container">
+		<div class="signal-core">
 			<div class="signal-circle red" id="circle-d"></div>
-			D: <input type="number" name="signalD" id="signal-d" min="1" max="4" value="<?php echo $signalData['d']; ?>">
+		</div>
+	</div>
+
+	<form id="signal-form">
+		<div class="signal-seq">
+			<div class="form-group">
+				<label for="signal-a">Signal A:</label>
+				<input type="number" id="signal-a" name="signalA" min="1" max="4" value="<?php echo $signalData['a']; ?>" required>
+			</div>
+
+			<div class="form-group">
+				<label for="signal-b">Signal B:</label>
+				<input type="number" id="signal-b" name="signalB" min="1" max="4" value="<?php echo $signalData['b']; ?>" required>
+			</div>
+
+			<div class="form-group">
+				<label for="signal-c">Signal C:</label>
+				<input type="number" id="signal-c" name="signalC" min="1" max="4" value="<?php echo $signalData['c']; ?>" required>
+			</div>
+
+			<div class="form-group">
+				<label for="signal-d">Signal D:</label>
+				<input type="number" id="signal-d" name="signalD" min="1" max="4" value="<?php echo $signalData['d']; ?>" required>
+			</div>
 		</div>
 
-		<div class="intervals">
-			Green Light Intervals:
-			<input type="number" name="greenInterval" name="green-interval" id="green-interval" value="<?php echo $signalData['green_interval']; ?>">
+		<div class="form-group">
+			<label for="green-interval">Green Light Interval (sec):</label>
+			<input type="number" id="green-interval" name="greenInterval" min="1" value="<?php echo $signalData['green_interval']; ?>" required>
 		</div>
 
-		<div class="intervals">
-			Yellow Light Intervals:
-			<input type="number" name="yellowInterval" name="yellow-interval" id="yellow-interval" value="<?php echo $signalData['yellow_interval']; ?>">
+		<div class="form-group">
+			<label for="yellow-interval">Yellow Light Interval (sec):</label>
+			<input type="number" id="yellow-interval" name="yellowInterval" min="1" value="<?php echo $signalData['yellow_interval']; ?>" required>
 		</div>
-		<button type="button" onclick="startSignal()">Start</button>
-		<button type="button" onclick="stopSignal(true)" >Stop</button>
 
+		<div class="buttons">
+			<button type="button" onclick="startSignal()">Start</button>
+			<button type="button" onclick="stopSignal(true)">Stop</button>
+		</div>
 	</form>
+</div>
 
 	<script type="text/javascript">
 		function startSignal() {
@@ -93,13 +93,13 @@ $signalData = $this->getSignalData();
 					if (response.status === 'success') {
 						runSignal(sequence, greenInterval, yellowInterval);
 					}
-
 					if (response.status === 'error') {
 						alert(response.message)
 					}
 				}
 			});
 		}
+
 		var signalTimeout;
 		function runSignal(sequence, greenInterval, yellowInterval) {
 			var	signalOrder = sequence.map(Number);
